@@ -1,19 +1,25 @@
 import * as express from 'express';
 import * as PouchDB from 'pouchdb';
 import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
 
-const RedisPouchDB = PouchDB.defaults({ db: require('redisdown') } as any);
 const app = express();
-const lentaPouch = new RedisPouchDB('lenta');
+const lentaPouch = new PouchDB('lenta');
 
 app.use(bodyParser.json());
-app.use('/db', require('express-pouchdb')(RedisPouchDB));
+app.use(cors({
+  origin: 'http://82.202.226.64',
+  credentials: true,
+  methods: 'GET, PUT, POST, HEAD, DELETE',
+  allowedHeaders: 'accept, authorization, content-type, origin, referer, x-csrf-token',
+}));
+app.use('/db', require('express-pouchdb')(PouchDB));
 
 type Post = {
-  id: string,
-  title: string,
   url: string,
-  creationTime: Date,
+  title: string,
+  user: string,
+  publicationTime: Date,
 };
 
 app.post('/post', async (req: express.Request, res: express.Response) => {

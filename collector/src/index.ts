@@ -1,4 +1,7 @@
 import { Client } from 'pg';
+import axios from 'axios';
+
+const SERVER = 'http://82.202.226.64:27513';
 
 const pgPost: Client = new Client('postgresql://gorod:123qwe@localhost:5432/pablo_blog');
 const pgUser: Client = new Client('postgresql://gorod:123qwe@localhost:5432/pablo_user');
@@ -40,17 +43,20 @@ class Collector {
       usersId,
     )).rows;
 
-    const result = posts.map((post) => {
+    const events = posts.map((post) => {
       const user = users.find(user => user.id === post.userId) as User;
       return {
-        /* tslint:disable-next-line:max-line-length */
         url: `https://mel.fm/blog/${user.address}/${post.addressId}-${post.addressTitle}`,
         title: post.title,
         user: user.displayName ? user.displayName : `${user.firstName} ${user.lastName}`,
+        publicationTime: post.publicationTime,
       };
     });
 
-    console.log(result);
+    console.log(events);
+    await Promise.all(
+      events.map(event => axios.post(`${SERVER}/post`, event)),
+    );
 
     await Promise.all([pgPost.end(), pgUser.end()]);
   }

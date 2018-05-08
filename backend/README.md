@@ -1,5 +1,13 @@
+# Requirements
+
+* Debian 9
+* node 8
+* yarn
+* redis-server
+
+# Installation
 ```
-sudo service redis-server start
 yarn install
+yarn build
 yarn start
 ```
